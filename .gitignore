@@ -1,0 +1,14 @@
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+*.db
+*.db-journal
+node_modules/
+.next/
+frontend/tsconfig.tsbuildinfo
+.venv/
+.claude/settings.local.json
+
+# local editor/tooling config
+.claude/

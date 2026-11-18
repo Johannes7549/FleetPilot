@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-fleetpilot}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fleetpilot}
+      POSTGRES_DB: ${POSTGRES_DB:-fleetpilot}
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fleetpilot}"]
+      interval: 3s
+      retries: 20
+
+  backend:
+    build: { context: ., dockerfile: backend/Dockerfile }
+    env_file: [{ path: .env, required: false }]
+    environment:
+      FLEETPILOT_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-fleetpilot}:${POSTGRES_PASSWORD:-fleetpilot}@db:5432/${POSTGRES_DB:-fleetpilot}
+      FLEETPILOT_CORS_ORIGINS: http://localhost:3000
+    depends_on: { db: { condition: service_healthy } }
+    ports: ["8000:8000"]
+
+  frontend:
+    build: { context: ./frontend, args: { BACKEND_URL: http://backend:8000 } }
+    environment: { BACKEND_URL: http://backend:8000 }
+    depends_on: [backend]
+    ports: ["3000:3000"]
+
+volumes:
+  pgdata:
