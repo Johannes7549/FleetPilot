@@ -11,6 +11,11 @@ import type { AgentRun } from "@/types/api";
 
 interface AuditRow { id: number; ts: string; actor_id: string; actor_type: string; event_type: string; device_id: string | null; action_proposal_id: string | null; entry_hash: string }
 
+const RUN_TONE: Record<string, string> = {
+  answered: "ok", partial: "warning", awaiting_approval: "brand", action_refused: "warning", refused: "error", error: "error",
+  cannot_answer: "neutral", not_found: "warning", insufficient_evidence: "warning", needs_clarification: "warning",
+};
+
 function RunDetail({ id }: { id: string }) {
   const { data, error, loading } = useApi<AgentRun>(`/api/agent-runs/${id}`, [id]);
   if (loading) return <Spinner />;
@@ -18,7 +23,7 @@ function RunDetail({ id }: { id: string }) {
   return (
     <Card>
       <CardHeader title={data.question} subtitle={`${fmtDate(data.created_at, true)} · ${data.user_id} · ${data.duration_ms} ms`}
-        action={<Badge tone={data.status === "error" ? "error" : "ok"}>{humanize(data.status)}</Badge>} />
+        action={<Badge tone={RUN_TONE[data.status] ?? "neutral"}>{humanize(data.status)}</Badge>} />
       <CardBody className="space-y-3">
         <RunExecutionPanel ex={data.execution ?? data.response?.execution} plan={data.response?.plan ?? data.plan}
           intent={data.intent} validation={data.response?.grounding?.validation ?? null} status={data.status} />

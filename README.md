@@ -23,6 +23,16 @@ Built for the Rayda *Senior Agentic AI Engineer* take-home.
 
 ---
 
+## Screenshots & demo
+
+![FleetPilot tour](docs/demo/fleetpilot-tour.gif)
+
+The tour above covers every section of the app. The full walkthrough video
+([`fleetpilot-walkthrough.webm`](docs/demo/fleetpilot-walkthrough.webm)) and individual screenshots of each
+page are in the [`docs/demo/`](docs/demo) folder.
+
+---
+
 ## Quick start
 
 ### Option A — Docker Compose (PostgreSQL + API + UI)
