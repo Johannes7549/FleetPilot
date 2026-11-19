@@ -3,6 +3,7 @@
     python scripts/run_llm_evaluations.py            # mocked provider (no key, no cost); live marked NOT EXECUTED
     python scripts/run_llm_evaluations.py --live     # also run against FLEETPILOT_LLM_PROVIDER (needs its API key)
     python scripts/run_llm_evaluations.py --only multi_step
+    python scripts/run_llm_evaluations.py --live --live-cases L01,L05,L12   # full mocked suite + a live subset
 
 Reports: evaluation/results/llm_latest.md and llm_latest.json. Exit code 1 if an executed suite has failures.
 """
@@ -24,7 +25,9 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--live", action="store_true", help="also evaluate the configured real LLM provider")
     ap.add_argument("--no-mock", action="store_true", help="skip the mocked-provider run")
-    ap.add_argument("--only", default=None, help="category or case-id prefix")
+    ap.add_argument("--only", default=None, help="category or case-id prefix; comma-separated list allowed (e.g. L01,L05,multi_turn)")
+    ap.add_argument("--live-cases", default=None,
+                    help="restrict only the live run (cost control), e.g. L01,L05,L12; defaults to --only")
     ap.add_argument("--out", default=str(ROOT / "evaluation" / "results"))
     args = ap.parse_args()
     logging.disable(logging.CRITICAL)
@@ -50,7 +53,7 @@ def main() -> int:
                 + (f" — {status['unavailable_reason']}" if status["unavailable_reason"] else "")}
     else:
         print(f"FleetPilot LLM evaluation — LIVE provider {status['provider']} / {status['model']}")
-        live = run_suite("live", provider_factory=get_provider, only=args.only, baseline=False)
+        live = run_suite("live", provider_factory=get_provider, only=args.live_cases or args.only, baseline=False)
         live.update(provider=status["provider"], model=status["model"])
         print(f"  live: {live['passed']}/{live['total']} passed\n")
     if not live["executed"]:

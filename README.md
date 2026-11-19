@@ -16,7 +16,7 @@ replacement flags, employee notifications) that execute only after an authorised
   actions, payload-hash-bound and idempotent approvals, hash-chained append-only audit log, prompt-injection
   sanitising.
 * **Evaluated, two suites reported separately:** 65 deterministic cases (**65/65**) and 43 LLM cases run with a
-  mocked provider through the real SDKs (**43/43**), with LLM mode also verified against the live Anthropic API, plus
+  mocked provider through the real SDKs (**43/43**) and a live-model subset on `claude-opus-5-5` (**12/12**), plus
   109 unit/integration tests (105 + 4 PostgreSQL-only), on SQLite and PostgreSQL 16.
 
 Built for the Rayda *Senior Agentic AI Engineer* take-home.
@@ -93,6 +93,7 @@ cd backend && python -m pytest                      # 105 passed + 4 skipped (RL
 python scripts/run_evaluations.py                   # deterministic suite, 65 cases -> evaluation/results/latest.md
 python scripts/run_llm_evaluations.py               # LLM suite, 43 cases, mocked provider -> evaluation/results/llm_latest.md
 python scripts/run_llm_evaluations.py --live        # + the configured real provider (needs its API key)
+python scripts/run_llm_evaluations.py --live --live-cases L01,L02,L05,L06,L09,L12,L15,L19,L32,L33,L35,L42   # live subset (cost control)
 python scripts/run_evaluations.py --db postgresql+psycopg://...   # deterministic suite on PostgreSQL (dedicated DB)
 FLEETPILOT_TEST_DATABASE_URL=postgresql+psycopg://... python -m pytest   # tests on PostgreSQL (109 passed)
 ```
@@ -101,7 +102,13 @@ FLEETPILOT_TEST_DATABASE_URL=postgresql+psycopg://... python -m pytest   # tests
 |---|---|
 | Deterministic evaluation | **65/65** — factual 14/14, grounding 6/6, temporal 8/8, safety 15/15, tool selection 14/14, failure 8/8 |
 | LLM evaluation, mocked provider | **43/43** — tool selection 34/34, task completion, grounding, safety, reliability 43/43 each |
-| LLM mode, live provider | verified against the live Anthropic API with a real key; re-run any time with `--live` |
+| LLM evaluation, live provider | **12/12** on `claude-opus-5-5` (live Anthropic API, representative subset across 9 categories; 26 LLM calls, ~137k tokens). All five dimensions 100% |
+
+Both LLM runs are in `evaluation/results/llm_latest.md`. In the live run the model interpreted phrasings the rule
+classifier cannot place, decomposed two-part questions, resolved a dependent step through result review (riskiest
+device → its battery history) and a multi-turn reference ("its battery"); every model-written answer passed grounding
+verification, and injection / cross-tenant / approval-bypass attempts were stopped. The OpenAI provider is covered by
+the mocked suite (request shape, structured output, refusal and error handling) but was not run against the live API.
 
 The mocked LLM suite runs FleetPilot's real provider code and the real Anthropic/OpenAI SDK clients over a scripted
 HTTP transport: it verifies how FleetPilot handles model output (including malformed and malicious output, 429s,

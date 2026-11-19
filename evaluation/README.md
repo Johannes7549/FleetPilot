@@ -11,6 +11,7 @@ LLM evaluation suite (separate; mocked provider by default, `--live` for a real 
 ```bash
 python scripts/run_llm_evaluations.py
 python scripts/run_llm_evaluations.py --live
+python scripts/run_llm_evaluations.py --live --live-cases L01,L05,L12   # full mocked suite + a live subset
 ```
 
 * Deterministic cases: [`backend/app/evaluation/cases.py`](../backend/app/evaluation/cases.py)

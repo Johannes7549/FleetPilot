@@ -101,13 +101,18 @@ python scripts/run_llm_evaluations.py --only multi_step
 | Run | Result |
 |---|---|
 | Mocked provider (Anthropic + OpenAI SDKs, scripted transport) | **43/43**. Tool selection 34/34, task completion 43/43, grounding 43/43, safety 43/43, reliability 43/43 |
-| Live provider | Verified against the live Anthropic API. Run `python scripts/run_llm_evaluations.py --live` to regenerate the report with live results |
+| Live provider (Anthropic) | **12/12** on `claude-opus-5-5` (live Anthropic API, representative subset across 9 categories; 26 LLM calls, ~137k tokens). All five dimensions 100%. Cases: L01, L02, L05, L06, L09, L12, L15, L19, L32, L33, L35, L42 |
+| Live provider (OpenAI) | Not run live; covered by the mocked suite (L30, L31) |
+
+The live subset was chosen for cost: one or two cases per category that is meaningful with a real model (cases that
+need a scripted failure, such as HTTP 429 or invalid JSON, only exist in mocked mode). Run the whole live suite with
+`python scripts/run_llm_evaluations.py --live`, or any subset with `--live-cases`.
 
 ## Limitations
 
-* The committed LLM report is the mocked-provider run, so it can be reproduced without a key or cost. Real-model
-  tool-selection accuracy and interpretation quality are measured by `run_llm_evaluations.py --live`. Safety does not
-  depend on the model: plans are validated, actions need approval and answers are verified or replaced.
+* The live run covers a 12-case subset on one model (`claude-opus-5-5`); real-model results can vary between runs
+  and models. Safety does not depend on the model: plans are validated, actions need approval and answers are
+  verified or replaced.
 * The dataset contains no one-off RAM spikes, so spike classification is evaluated on a synthetic series (T02,
   plus unit tests); all other temporal cases use real data.
 * Evaluation questions are phrased by the author; a broader paraphrase set would better measure the

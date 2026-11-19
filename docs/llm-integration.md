@@ -123,6 +123,12 @@ Prompts' sizes are recorded, not their text. No chain-of-thought is requested, s
   transport (`app/evaluation/llm_mock.py`). This exercises request construction, SDK retries, HTTP error mapping,
   parsing and the agent's handling of good, bad and malicious model output. Results: `tests/test_llm.py`, and
   `scripts/run_llm_evaluations.py` with 43 cases.
-- **Live provider: verified** against the live Anthropic API with a real key. `python
-  scripts/run_llm_evaluations.py --live` runs the same expectations against the configured model and adds a live
-  section to the report. Without a key, that section is marked **NOT EXECUTED** and gives the reason.
+- **Live provider (Anthropic): verified.** 12/12 live cases passed on `claude-opus-5-5` (26 LLM calls, ~137k
+  tokens): colloquial interpretation, two-part decomposition, a dependent follow-up through result review,
+  argument generation, a multi-turn reference, unsupported data, an ambiguous request, telemetry injection,
+  cross-tenant and approval-bypass attempts. Every model-written answer passed the grounding verifier. A typical
+  answered question costs 3 calls (plan, review, respond), or 4 with one follow-up round. Results:
+  `evaluation/results/llm_latest.md` (live section).
+- **Live provider (OpenAI):** not run live; the provider is covered by the mocked suite.
+- `python scripts/run_llm_evaluations.py --live [--live-cases …]` re-runs the live evaluation against the configured
+  model. Without a key, the live section is marked **NOT EXECUTED** and gives the reason.

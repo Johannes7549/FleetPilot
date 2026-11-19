@@ -124,7 +124,7 @@ def run_suite(mode: str, *, provider_factory=None, only: str | None = None, base
     shared = build_database(None)
     results = []
     for c in LLM_CASES:
-        if only and not (c.id.startswith(only) or c.category == only):
+        if only and not any(c.id.startswith(o) or c.category == o for o in only.split(",")):
             continue
         if mode == "live" and not c.live:
             continue
